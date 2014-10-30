@@ -36,6 +36,18 @@
   <div id="products-table-wrapper">
     <%= render :partial => "related_products_table", :locals => {:product => @product} %>
   </div>
+  
+  <h2>Related Products</h2>
+  <div class="collapsible">
+    <% @products.keys.each do |taxon_name| %>
+      <h3><%= taxon_name %></h3>
+      <ul>
+      <% @products[taxon_name].each do |related_product| %>
+        <li class="product_to_add"><%= link_to "#{related_product.id}: #{related_product.designer.name} - #{related_product.name} #{related_product.price}", admin_product_relations_url(@product), "data-product-id" => "#{related_product.variants.first.id}" %>
+      <% end %>
+      </ul>
+    <% end %>
+  </div>
 
   <%= content_for :head do %>
     <script type="text/javascript">
@@ -52,6 +64,23 @@
           data: {
             "relation[related_to_type]" : "Product",
             "relation[related_to_id]": $('#add_variant_name').val(),
+            "relation[relation_type_id]": $('#add_type').val(),
+            "relation[discount_amount]" : $('#add_discount').val()
+          }
+        });
+        return false;
+      });
+
+      $(document).on("click",".product_to_add a", function(){
+        update_target ='products-table-wrapper'
+
+        jQuery.ajax({
+          dataType: 'script', 
+          url: this.href, 
+          type: "POST",
+          data: {
+            "relation[related_to_type]" : "Product",
+            "relation[related_to_id]": $(this).attr("data-product-id"),
             "relation[relation_type_id]": $('#add_type').val(),
             "relation[discount_amount]" : $('#add_discount').val()
           }
